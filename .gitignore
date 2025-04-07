@@ -364,3 +364,6 @@ FodyWeavers.xsd
 
 # Ignore SNK files
 *.snk
+
+# Ignore nuget.config
+nuget.config
