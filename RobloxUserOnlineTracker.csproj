@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net9.0;net8.0;net7.0;net6.0;net5.0</TargetFrameworks>
+	<LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>RobloxUserOnlineTracker.snk</AssemblyOriginatorKeyFile>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>RobloxUserOnlineTracker</Title>
+	<Description>RobloxUserOnlineTracker is a lightweight .NET library that allows you to track the online presence of Roblox users in real-time.</Description>
+	<Version>1.0.0</Version>
+	<Authors>Marco Concas</Authors>
+	<Company>Marco Concas</Company>
+	<PackageId>RobloxUserOnlineTracker</PackageId>
+	<PackageTags>roblox;user;online;tracker</PackageTags>
+	<Copyright>Copyright (c) 2025 - Marco Concas. All rights reserved.</Copyright>
+	<PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
+	<RepositoryUrl>https://github.com/Marko97IT/RobloxUserOnlineTracker</RepositoryUrl>
+	<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+	<ApplicationIcon>icon.ico</ApplicationIcon>
+	<PackageIcon>icon_nuget.png</PackageIcon>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="icon_nuget.png" Pack="true" PackagePath="" />
+	<None Include="README.md" Pack="True" PackagePath="\" />
+  </ItemGroup>
+</Project>
