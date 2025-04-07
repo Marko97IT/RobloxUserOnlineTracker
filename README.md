@@ -65,6 +65,14 @@ long[] userIds = [123456, 789012];
 var usersStatusOnline = await tracker.GetUsersOnlineStatusAsync(userIds);
 ```
 
+### Real use case
+
+In the following screenshots I have included a real use case. I decide to track the online status of myself and another test account and send a real-time notification to myself with Telegram using a bot. Finally I started the application in a Docker container.
+
+![Screenshot 1](https://i.postimg.cc/MZsk9X7M/ruot-1.webp)
+
+![Screenshot 2](https://i.postimg.cc/fTXGD54X/ruot-2.webp)
+
 ---
 
 ## 📦 API Reference
