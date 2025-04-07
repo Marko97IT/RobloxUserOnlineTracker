@@ -96,14 +96,12 @@ namespace RobloxUserOnlineTracker
                             {
                                 UserStatusChanged?.Invoke(this, new UserOnlineStatusChangedEventArgs(userStatus.Key, userStatus.Value));
                             }
-                            else
-                            {
-                                _firstTrackTick = false;
-                            }
                         }
 
                         _trackerPreviouslyUsersStatus[userStatus.Key] = userStatus.Value;
                     });
+
+                    _firstTrackTick = false;
                 }
                 catch { }
             };
