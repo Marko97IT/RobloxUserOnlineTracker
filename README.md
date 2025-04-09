@@ -66,7 +66,7 @@ long[] userIds = { 123456, 789012 };
 var usersStatusOnline = await tracker.GetUserOnlinePresenceAsync(userIds);
 ```
 
-### Real use case (old version, the code may changes)
+#### Real case example
 
 In the following screenshots I have included a real use case. I decide to track the online status of myself and another test account and send a real-time notification to myself with Telegram using a bot. Finally I started the application in a Docker container.
 
@@ -110,7 +110,6 @@ In the following screenshots I have included a real use case. I decide to track 
 | `long Id` | Get the user ID. |
 | `string Username` | Get the user name. |
 | `string? DisplayName` | Get the user display name. |
-
 ---
 
 ## 🛡 License
