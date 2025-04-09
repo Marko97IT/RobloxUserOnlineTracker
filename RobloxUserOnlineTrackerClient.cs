@@ -4,6 +4,7 @@
 using RobloxUserOnlineTracker.DTOs;
 using RobloxUserOnlineTracker.Enums;
 using RobloxUserOnlineTracker.Events;
+using RobloxUserOnlineTracker.Exceptions;
 using RobloxUserOnlineTracker.Models;
 using System.Net;
 using System.Net.Http.Json;
@@ -23,13 +24,17 @@ namespace RobloxUserOnlineTracker
         /// Event triggered when a user's online presence changes.
         /// </summary>
         public event EventHandler<UserPresenceChangedEventArgs>? UserOnlinePresenceChanged;
+        /// <summary>
+        /// Event triggered when an error occurs during tracking.
+        /// </summary>
+        public event EventHandler<Exception>? TrackingErrorOccurred;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RobloxUserOnlineTrackerClient"/> class with the specified Roblox authentication cookie value.
         /// </summary>
         /// <param name="cookieValue">The <c>.ROBLOSECURITY</c> cookie value.</param>
         /// <exception cref="ArgumentNullException"></exception>
-        /// <exception cref="InvalidOperationException"></exception>
+        /// <exception cref="RobloxUserOnlineTrackerException"></exception>
         public RobloxUserOnlineTrackerClient(string cookieValue)
         {
             if (string.IsNullOrEmpty(cookieValue))
@@ -56,7 +61,7 @@ namespace RobloxUserOnlineTracker
             {
                 DefaultRequestHeaders =
                 {
-                    { "User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36" }
+                    { "User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36" }
                 }
             };
 
@@ -66,14 +71,14 @@ namespace RobloxUserOnlineTracker
                 using var response = _httpClient.Send(request);
                 response.EnsureSuccessStatusCode();
             }
-            catch
+            catch (Exception ex)
             {
-                throw new InvalidOperationException("Invalid cookie value");
+                throw new RobloxUserOnlineTrackerException("Unable to determine if the .ROBLOSECURITY cookie value is valid.", ex);
             }
         }
 
         /// <summary>
-        /// Releases the resources used by the <see cref="TrackerOnlineStatusClient"/> class.
+        /// Releases the resources used by the <see cref="RobloxUserOnlineTrackerClient"/> class.
         /// </summary>
         public void Dispose()
         {
@@ -90,6 +95,7 @@ namespace RobloxUserOnlineTracker
         /// <param name="userIds">The user IDs of the online presence of the user you want to track.</param>
         /// <param name="trackInterval">The interval in milliseconds for each update.</param>
         /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="RobloxUserOnlineTrackerException"></exception>
         public void StartTracking(long[] userIds, int trackInterval = 5000, CancellationToken cancellationToken = default)
         {
             if (_isTracking)
@@ -140,14 +146,21 @@ namespace RobloxUserOnlineTracker
 
                         await Task.Delay(trackInterval, cancellationToken);
                     }
-                    catch (TaskCanceledException)
+                    catch (Exception ex)
                     {
                         StopTracking();
-                    }
-                    catch
-                    {
-                        StopTracking();
-                        throw new Exception("Unable to get user online presences. The tracking was stopped");
+
+                        if (ex is RobloxUserOnlineTrackerException)
+                        {
+                            TrackingErrorOccurred?.Invoke(this, ex);
+                            return;
+                        }
+
+                        if (ex is not TaskCanceledException)
+                        {
+                            TrackingErrorOccurred?.Invoke(this, new RobloxUserOnlineTrackerException("Unable to get user online presences. See the inner exception for more details", ex));
+                            return;
+                        }
                     }
                 }
             }, cancellationToken);
@@ -168,22 +181,40 @@ namespace RobloxUserOnlineTracker
         /// <param name="userIds">The user IDs of the users whose online presence you want to get.</param>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>An array with the user online presences.</returns>
-        /// <exception cref="Exception"></exception>
+        /// <exception cref="RobloxUserOnlineTrackerException"></exception>
         public async Task<RobloxUserOnlinePresence[]> GetUserOnlinePresenceAsync(long[] userIds, CancellationToken cancellationToken = default)
         {
-            using var response = await _httpClient.PostAsJsonAsync("https://presence.roblox.com/v1/presence/users", new { userIds }, cancellationToken);
-
-            if (response.IsSuccessStatusCode)
+            try
             {
+                using var response = await _httpClient.PostAsJsonAsync("https://presence.roblox.com/v1/presence/users", new { userIds }, cancellationToken);
+                response.EnsureSuccessStatusCode();
+
                 var userPresenceResponse = await response.Content.ReadFromJsonAsync<UserPresenceResponse>(cancellationToken: cancellationToken);
 
                 if (userPresenceResponse != null)
                 {
-                    return userPresenceResponse.UserPresences.Select(up => new RobloxUserOnlinePresence(up.UserId)).ToArray();
+                    return userPresenceResponse.UserPresences.Select(up => new RobloxUserOnlinePresence(up.UserId)
+                    {
+                        UserPresence = (UserPresenceType)up.UserPresenceType,
+                        CurrentLocation = up.UserPresenceType == 0 ? string.Empty : up.LastLocation,
+                        GameId = up.PlaceId,
+                        GameInstanceId = up.GameId
+                    }).ToArray();
+                }
+                else
+                {
+                    throw new RobloxUserOnlineTrackerException("Unable to deserialize the response");
                 }
             }
+            catch (Exception ex)
+            {
+                if (ex is not RobloxUserOnlineTrackerException)
+                {
+                    throw new RobloxUserOnlineTrackerException("Unable to get user online presences. See the inner exception for more details", ex); ;
+                }
 
-            throw new Exception("Unable to get user online presences");
+                throw;
+            }
         }
     }
 }

@@ -6,7 +6,7 @@ using RobloxUserOnlineTracker.Models;
 namespace RobloxUserOnlineTracker.Events
 {
     /// <summary>
-    /// Represents the event arguments for the <see cref="RobloxUserOnlineTrackerClient.UserStatusChanged"/> event.
+    /// Represents the event arguments for the <see cref="RobloxUserOnlineTrackerClient.UserOnlinePresenceChanged"/> event.
     /// </summary>
     public sealed class UserPresenceChangedEventArgs : EventArgs
     {

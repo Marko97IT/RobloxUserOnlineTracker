@@ -2,6 +2,7 @@
 // Licensed under the MPL-2.0 License. License informations are available here: https://mozilla.org/MPL/2.0/
 
 using RobloxUserOnlineTracker.Enums;
+using RobloxUserOnlineTracker.Exceptions;
 using RobloxUserOnlineTracker.Extensions;
 using System.Text.Json;
 
@@ -44,13 +45,25 @@ namespace RobloxUserOnlineTracker.Models
                 _isDisposed = false;
             }
 
-            using var request = new HttpRequestMessage(HttpMethod.Get, $"https://users.roblox.com/v1/users/{userId}");
-            using var response = _httpClient.Send(request);
-
-            if (response.IsSuccessStatusCode)
+            try
             {
+                using var request = new HttpRequestMessage(HttpMethod.Get, $"https://users.roblox.com/v1/users/{userId}");
+                using var response = _httpClient.Send(request);
+                response.EnsureSuccessStatusCode();
+
                 var responseContent = response.Content.ReadAsString();
-                User = JsonSerializer.Deserialize<RobloxUser>(responseContent) ?? throw new Exception("Failed to fetch user data");
+                User = JsonSerializer.Deserialize<RobloxUser>(responseContent) ?? throw new RobloxUserOnlineTrackerException("Unable to deserialize the response");
+            }
+            catch (Exception ex)
+            {
+                if (ex is not RobloxUserOnlineTrackerException)
+                {
+                    throw new RobloxUserOnlineTrackerException("Unable to fetch user details", ex);
+                }
+                else
+                {
+                    throw;
+                }
             }
         }
 
