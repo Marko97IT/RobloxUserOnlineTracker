@@ -78,7 +78,7 @@ In the following screenshots I have included a real use case. I decide to track 
 
 ## 📦 API Reference
 
-### `RobloxUserOnlineTrackerClient` - <i>instantiable</i> - <i>disposable</i>
+### `RobloxUserOnlineTrackerClient` - *instantiable* - *disposable*
 
 | Member | Description |
 |--------|-------------|
@@ -89,7 +89,7 @@ In the following screenshots I have included a real use case. I decide to track 
 | `Task<RobloxUserOnlinePresence[]> GetUserOnlinePresenceAsync(long[] userIds)` | Manually query user presence without event logic. |
 | `event UserOnlinePresenceChanged` | Fired when a user's online status changes. |
 
-### `RobloxUserOnlinePresence` - <i>not instantiable</i> - <i>readonly fields</i> - <i>returned</i>
+### `RobloxUserOnlinePresence` - *not instantiable* - *readonly fields* - *returned*
 
 | Member | Description |
 |--------|-------------|
@@ -99,7 +99,7 @@ In the following screenshots I have included a real use case. I decide to track 
 | `long? GameId` | Get the location ID where the user is currently located. This information is only available if the user shares this information with you or publicly. |
 | `Guid? GameInstanceId` | Get the instance ID of the location where the user is currently located. It can be used to join the user experience. This information is only available if the user shares this information with you or publicly. |
 
-### `RobloxUser` - <i>not instantiable</i> - <i>readonly fields</i>
+### `RobloxUser` - *not instantiable* - *readonly fields*
 
 | Member | Description |
 |--------|-------------|
