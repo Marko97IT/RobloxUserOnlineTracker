@@ -110,6 +110,7 @@ In the following screenshots I have included a real use case. I decide to track 
 | `long Id` | Get the user ID. |
 | `string Username` | Get the user name. |
 | `string? DisplayName` | Get the user display name. |
+
 ---
 
 ## 🛡 License
