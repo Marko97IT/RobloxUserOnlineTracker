@@ -4,7 +4,7 @@
 #nullable disable warnings
 using System.Text.Json.Serialization;
 
-namespace RobloxUserOnlineTracker.DTOs
+namespace RobloxUserOnlineTracker.DTOs.Responses
 {
     internal class UserPresenceResponse
     {

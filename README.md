@@ -10,6 +10,8 @@
 ## ✨ Features
 
 - ✅ Track multiple Roblox user IDs for presence changes.
+- 🔰 Supports .NET 5, .NET 6, .NET 7, .NET 8 and .NET 9.
+- 🏃‍♂️ Fully supports AOT compilation and trimming (.NET 6+).
 - ⏱️ Set custom tracking intervals.
 - 🪝 Event-driven architecture with two key events:
   - `UserOnlinePresenceChanged` — triggered when a user's online status changes.
@@ -88,6 +90,7 @@ In the following screenshots I have included a real use case. I decide to track 
 | `void StopTracking()` | Stops polling and clears tracked data. |
 | `Task<RobloxUserOnlinePresence[]> GetUserOnlinePresenceAsync(long[] userIds)` | Manually query user presence without event logic. |
 | `event UserOnlinePresenceChanged` | Fired when a user's online status changes. |
+| `event TrackingErrorOccurred` | Fired when an error occurs during tracking. |
 
 ### `RobloxUserOnlinePresence` - *not instantiable* - *readonly fields* - *returned*
 
@@ -110,6 +113,7 @@ In the following screenshots I have included a real use case. I decide to track 
 | `long Id` | Get the user ID. |
 | `string Username` | Get the user name. |
 | `string? DisplayName` | Get the user display name. |
+
 ---
 
 ## 🛡 License

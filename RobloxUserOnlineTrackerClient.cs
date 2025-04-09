@@ -1,7 +1,11 @@
 ﻿// Copyright (c) 2025 - Marco Concas. All rights reserved.
 // Licensed under the MPL-2.0 License. License informations are available here: https://mozilla.org/MPL/2.0/
 
-using RobloxUserOnlineTracker.DTOs;
+#if NET6_0_OR_GREATER
+using RobloxUserOnlineTracker.AOT;
+#endif
+using RobloxUserOnlineTracker.DTOs.Requests;
+using RobloxUserOnlineTracker.DTOs.Responses;
 using RobloxUserOnlineTracker.Enums;
 using RobloxUserOnlineTracker.Events;
 using RobloxUserOnlineTracker.Exceptions;
@@ -186,11 +190,19 @@ namespace RobloxUserOnlineTracker
         {
             try
             {
-                using var response = await _httpClient.PostAsJsonAsync("https://presence.roblox.com/v1/presence/users", new { userIds }, cancellationToken);
+                var payload = new UserPresenceRequest { UserIds = userIds };
+#if NET6_0_OR_GREATER
+                using var response = await _httpClient.PostAsJsonAsync("https://presence.roblox.com/v1/presence/users", payload, UserPresenceRequestJsonContext.Default.UserPresenceRequest, cancellationToken);
+#else
+                using var response = await _httpClient.PostAsJsonAsync("https://presence.roblox.com/v1/presence/users", payload, cancellationToken);
+#endif
                 response.EnsureSuccessStatusCode();
 
+#if NET6_0_OR_GREATER
+                var userPresenceResponse = await response.Content.ReadFromJsonAsync(UserPresenceResponseJsonContext.Default.UserPresenceResponse, cancellationToken);
+#else
                 var userPresenceResponse = await response.Content.ReadFromJsonAsync<UserPresenceResponse>(cancellationToken: cancellationToken);
-
+#endif
                 if (userPresenceResponse != null)
                 {
                     return userPresenceResponse.UserPresences.Select(up => new RobloxUserOnlinePresence(up.UserId)

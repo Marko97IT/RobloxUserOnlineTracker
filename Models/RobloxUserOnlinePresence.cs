@@ -1,6 +1,9 @@
 ﻿// Copyright (c) 2025 - Marco Concas. All rights reserved.
 // Licensed under the MPL-2.0 License. License informations are available here: https://mozilla.org/MPL/2.0/
 
+#if NET6_0_OR_GREATER
+using RobloxUserOnlineTracker.AOT;
+#endif
 using RobloxUserOnlineTracker.Enums;
 using RobloxUserOnlineTracker.Exceptions;
 using RobloxUserOnlineTracker.Extensions;
@@ -52,7 +55,11 @@ namespace RobloxUserOnlineTracker.Models
                 response.EnsureSuccessStatusCode();
 
                 var responseContent = response.Content.ReadAsString();
+#if NET6_0_OR_GREATER
+                User = JsonSerializer.Deserialize(responseContent, RobloxUserJsonContext.Default.RobloxUser) ?? throw new RobloxUserOnlineTrackerException("Unable to deserialize the response");
+#else
                 User = JsonSerializer.Deserialize<RobloxUser>(responseContent) ?? throw new RobloxUserOnlineTrackerException("Unable to deserialize the response");
+#endif
             }
             catch (Exception ex)
             {
