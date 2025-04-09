@@ -70,9 +70,9 @@ var usersStatusOnline = await tracker.GetUserOnlinePresenceAsync(userIds);
 
 In the following screenshots I have included a real use case. I decide to track the online status of myself and another test account and send a real-time notification to myself with Telegram using a bot. Finally I started the application in a Docker container.
 
-![Screenshot 1](https://i.postimg.cc/MZsk9X7M/ruot-1.webp)
+![Screenshot 1](https://camo.githubusercontent.com/6d507dae481cda4113b2b4afb1d3d6ad7caab0b70ed7395d5561a3eaef03e3b1/68747470733a2f2f692e706f7374696d672e63632f4d5a736b3958374d2f72756f742d312e77656270)
 
-![Screenshot 2](https://i.postimg.cc/fTXGD54X/ruot-2.webp)
+![Screenshot 2](https://camo.githubusercontent.com/c9708f3f27fd751c48183ff3e49d71e650e47d3a9ee19c2e583b24c4524c044e/68747470733a2f2f692e706f7374696d672e63632f66545847443534582f72756f742d322e77656270)
 
 ---
 
