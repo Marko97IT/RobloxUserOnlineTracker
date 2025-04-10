@@ -26,7 +26,7 @@ namespace RobloxUserOnlineTracker.Models
         /// <summary>
         /// Gets the actual presence of the user.
         /// </summary>
-        public UserPresenceType UserPresence { get; internal set; }
+        public UserPresenceType Presence { get; internal set; }
         /// <summary>
         /// Get the location name where the user is currently located. This information is only available if the user shares this information with you or publicly.
         /// </summary>

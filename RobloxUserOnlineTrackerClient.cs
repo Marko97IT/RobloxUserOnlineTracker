@@ -98,6 +98,7 @@ namespace RobloxUserOnlineTracker
         /// </summary>
         /// <param name="userIds">The user IDs of the online presence of the user you want to track.</param>
         /// <param name="trackInterval">The interval in milliseconds for each update.</param>
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="RobloxUserOnlineTrackerException"></exception>
         public void StartTracking(long[] userIds, int trackInterval = 5000, CancellationToken cancellationToken = default)
@@ -137,9 +138,9 @@ namespace RobloxUserOnlineTracker
 
                             var userFirstTrack = !_userPreviousStates.TryGetValue(userOnlinePresence.User.Id, out var previousState);
 
-                            if (previousState != userOnlinePresence.UserPresence)
+                            if (previousState != userOnlinePresence.Presence)
                             {
-                                _userPreviousStates[userOnlinePresence.User.Id] = userOnlinePresence.UserPresence;
+                                _userPreviousStates[userOnlinePresence.User.Id] = userOnlinePresence.Presence;
 
                                 if (!userFirstTrack)
                                 {
@@ -207,7 +208,7 @@ namespace RobloxUserOnlineTracker
                 {
                     return userPresenceResponse.UserPresences.Select(up => new RobloxUserOnlinePresence(up.UserId)
                     {
-                        UserPresence = (UserPresenceType)up.UserPresenceType,
+                        Presence = (UserPresenceType)up.UserPresenceType,
                         CurrentLocation = up.UserPresenceType == 0 ? string.Empty : up.LastLocation,
                         GameId = up.PlaceId,
                         GameInstanceId = up.GameId

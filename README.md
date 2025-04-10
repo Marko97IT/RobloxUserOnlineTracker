@@ -97,7 +97,7 @@ In the following screenshots I have included a real use case. I decide to track 
 | Member | Description |
 |--------|-------------|
 | `RobloxUser User` | Get the user informations as a `RobloxUser` object. |
-| `UserPresenceType UserPresence` | Gets the actual presence of the user. |
+| `UserPresenceType Presence` | Gets the actual presence of the user. |
 | `string CurrentLocation` | Get the location name where the user is currently located. This information is only available if the user shares this information with you or publicly. |
 | `long? GameId` | Get the location ID where the user is currently located. This information is only available if the user shares this information with you or publicly. |
 | `Guid? GameInstanceId` | Get the instance ID of the location where the user is currently located. It can be used to join the user experience. This information is only available if the user shares this information with you or publicly. |
