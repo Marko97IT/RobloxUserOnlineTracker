@@ -21,7 +21,6 @@ namespace RobloxUserOnlineTracker
     public class RobloxUserOnlineTrackerClient : IDisposable
     {
         private readonly HttpClient _httpClient;
-        private Dictionary<long, UserPresenceType>? _userPreviousStates;
         private bool _isTracking;
 
         /// <summary>
@@ -121,7 +120,9 @@ namespace RobloxUserOnlineTracker
             _ = Task.Run(async () =>
             {
                 _isTracking = true;
-                _userPreviousStates = new Dictionary<long, UserPresenceType>(userIds.Length);
+
+                var userPreviousStates = new Dictionary<long, UserPresenceType>(userIds.Length);
+                var firstTrack = true;
 
                 while (_isTracking)
                 {
@@ -136,19 +137,18 @@ namespace RobloxUserOnlineTracker
                                 return;
                             }
 
-                            var userFirstTrack = !_userPreviousStates.TryGetValue(userOnlinePresence.User.Id, out var previousState);
-
-                            if (previousState != userOnlinePresence.Presence)
+                            if (userPreviousStates.GetValueOrDefault(userOnlinePresence.User.Id) != userOnlinePresence.Presence)
                             {
-                                _userPreviousStates[userOnlinePresence.User.Id] = userOnlinePresence.Presence;
+                                userPreviousStates[userOnlinePresence.User.Id] = userOnlinePresence.Presence;
 
-                                if (!userFirstTrack)
+                                if (!firstTrack)
                                 {
                                     UserOnlinePresenceChanged?.Invoke(this, new UserPresenceChangedEventArgs(userOnlinePresence));
                                 }
                             }
                         });
 
+                        firstTrack = false;
                         await Task.Delay(trackInterval, cancellationToken);
                     }
                     catch (Exception ex)
@@ -177,7 +177,6 @@ namespace RobloxUserOnlineTracker
         public void StopTracking()
         {
             _isTracking = false;
-            _userPreviousStates = null;
         }
 
         /// <summary>
