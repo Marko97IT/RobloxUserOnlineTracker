@@ -45,7 +45,7 @@ var tracker = new RobloxUserOnlineTrackerClient(".ROBLOSECURITY_COOKIE_HERE");
 
 tracker.UserOnlinePresenceChanged += (sender, args) =>
 {
-    Console.WriteLine($"User {args.UserPresence.User.Id} is now {args.UserPresence.UserPresence}");
+    Console.WriteLine($"User {args.UserPresence.User.Id} is now {args.UserPresence.Presence}");
 };
 
 tracker.TrackingErrorOccurred += (sender, ex) =>
