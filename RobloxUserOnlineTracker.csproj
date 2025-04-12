@@ -11,7 +11,7 @@
 	<GenerateDocumentationFile>true</GenerateDocumentationFile>
     <Title>RobloxUserOnlineTracker</Title>
 	<Description>RobloxUserOnlineTracker is a lightweight .NET library that allows you to track the online presence of Roblox users in real-time.</Description>
-	<Version>1.2.2</Version>
+	<Version>1.3.0</Version>
 	<Authors>Marco Concas</Authors>
 	<Company>Marco Concas</Company>
 	<PackageId>RobloxUserOnlineTracker</PackageId>

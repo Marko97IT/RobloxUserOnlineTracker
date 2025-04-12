@@ -30,7 +30,7 @@ namespace RobloxUserOnlineTracker
         /// <summary>
         /// Event triggered when an error occurs during tracking.
         /// </summary>
-        public event EventHandler<Exception>? TrackingErrorOccurred;
+        public event EventHandler<(Exception Exception, int? RetryAttempt, bool? TrackerStopped)>? TrackingErrorOccurred;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RobloxUserOnlineTrackerClient"/> class with the specified Roblox authentication cookie value.
@@ -88,47 +88,54 @@ namespace RobloxUserOnlineTracker
             _httpClient.Dispose();
             RobloxUserOnlinePresence.Dispose();
             UserOnlinePresenceChanged = null;
+            TrackingErrorOccurred = null;
 
             GC.SuppressFinalize(this);
         }
 
         /// <summary>
-        /// Starts tracking the online presence of Roblox users.
+        /// Starts tracking the online presence of Roblox users in a new thread. Subscribe <see cref="TrackingErrorOccurred"/> event to handle errors.
         /// </summary>
-        /// <param name="userIds">The user IDs of the online presence of the user you want to track.</param>
-        /// <param name="trackInterval">The interval in milliseconds for each update.</param>
+        /// <param name="configure">The configuration for the tracker.</param>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <exception cref="ArgumentException"></exception>
         /// <exception cref="RobloxUserOnlineTrackerException"></exception>
-        public void StartTracking(long[] userIds, int trackInterval = 5000, CancellationToken cancellationToken = default)
+        public void StartTracking(Action<TrackerOptions> configure, CancellationToken cancellationToken = default)
         {
             if (_isTracking)
             {
                 return;
             }
 
-            if (userIds.Length == 0)
-            {
-                throw new ArgumentException("User IDs cannot be empty", nameof(userIds));
-            }
+            var options = new TrackerOptions();
+            configure(options);
 
-            if (trackInterval < 5000)
+            if (options.RetryOnErrorValue)
             {
-                throw new ArgumentException("Track interval must be at least 5000 milliseconds", nameof(trackInterval));
+                if (options.RetryTimesValue < 1)
+                {
+                    throw new RobloxUserOnlineTrackerException("Retry times must be at least 1");
+                }
+
+                if (options.RetryAfterValue < 1)
+                {
+                    throw new RobloxUserOnlineTrackerException("Retry after must be at least 1 millisecond");
+                }
             }
 
             _ = Task.Run(async () =>
             {
                 _isTracking = true;
 
-                var userPreviousStates = new Dictionary<long, UserPresenceType>(userIds.Length);
+                var userPreviousStates = new Dictionary<long, byte>(options.UserIds.Length);
                 var firstTrack = true;
+                var retryAttempt = 0;
 
                 while (_isTracking)
                 {
                     try
                     {
-                        var userOnlinePresences = await GetUserOnlinePresenceAsync(userIds, cancellationToken);
+                        var userOnlinePresences = await GetUserOnlinePresenceAsync(options.UserIds, cancellationToken);
+
                         Parallel.ForEach(userOnlinePresences, (userOnlinePresence, state) =>
                         {
                             if (cancellationToken.IsCancellationRequested)
@@ -137,10 +144,10 @@ namespace RobloxUserOnlineTracker
                                 return;
                             }
 
-                            if (userPreviousStates.GetValueOrDefault(userOnlinePresence.User.Id) != userOnlinePresence.Presence)
+                            if (userPreviousStates.GetValueOrDefault(userOnlinePresence.User.Id) != (byte)userOnlinePresence.Presence)
                             {
-                                userPreviousStates[userOnlinePresence.User.Id] = userOnlinePresence.Presence;
-
+                                userPreviousStates[userOnlinePresence.User.Id] = (byte)userOnlinePresence.Presence;
+                                
                                 if (!firstTrack)
                                 {
                                     UserOnlinePresenceChanged?.Invoke(this, new UserPresenceChangedEventArgs(userOnlinePresence));
@@ -149,23 +156,30 @@ namespace RobloxUserOnlineTracker
                         });
 
                         firstTrack = false;
-                        await Task.Delay(trackInterval, cancellationToken);
+                        retryAttempt = 0;
+
+                        await Task.Delay(options.Interval);
                     }
                     catch (Exception ex)
                     {
-                        StopTracking();
-
                         if (ex is RobloxUserOnlineTrackerException)
                         {
-                            TrackingErrorOccurred?.Invoke(this, ex);
-                            return;
+                            TrackingErrorOccurred?.Invoke(this, (ex, retryAttempt, retryAttempt == options.RetryTimesValue));
+                        }
+                        else if (ex is not TaskCanceledException)
+                        {
+                            TrackingErrorOccurred?.Invoke(this, (new RobloxUserOnlineTrackerException("Unable to get user online presences. See the inner exception for more details", ex), retryAttempt, retryAttempt == options.RetryTimesValue));
                         }
 
-                        if (ex is not TaskCanceledException)
+                        if (options.RetryOnErrorValue && retryAttempt < options.RetryTimesValue)
                         {
-                            TrackingErrorOccurred?.Invoke(this, new RobloxUserOnlineTrackerException("Unable to get user online presences. See the inner exception for more details", ex));
-                            return;
+                            await Task.Delay(options.RetryAfterValue);
+
+                            retryAttempt++;
+                            continue;
                         }
+
+                        StopTracking();
                     }
                 }
             }, cancellationToken);
