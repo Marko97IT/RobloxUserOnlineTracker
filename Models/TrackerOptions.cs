@@ -17,14 +17,19 @@ namespace RobloxUserOnlineTracker.Models
         internal int RetryTimesValue { get; private set; }
         internal int RetryAfterValue { get; private set; }
 
+        internal TrackerOptions()
+        {
+            
+        }
+
         /// <summary>
         /// Set extra properties to fetch while tracking.
         /// </summary>
         /// <param name="properties">An array of extra properties.</param>
         /// <returns></returns>
-        public TrackerOptions WithExtraProperties(FetchExtraProperty properties)
+        public TrackerOptions WithExtraProperties(ExtraProperty properties)
         {
-            ExtraProperties = new HashSet<byte>(Enum.GetValues<FetchExtraProperty>()
+            ExtraProperties = new HashSet<byte>(Enum.GetValues<ExtraProperty>()
                 .Where(prop => properties.HasFlag(prop))
                 .Select(prop => (byte)prop)
             );

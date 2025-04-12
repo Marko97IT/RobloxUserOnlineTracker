@@ -7,7 +7,7 @@ namespace RobloxUserOnlineTracker.Enums
     /// Enum representing the extra properties that can be fetched while tracking.
     /// </summary>
     [Flags]
-    public enum FetchExtraProperty : byte
+    public enum ExtraProperty : byte
     {
         /// <summary>
         /// Fetches the user's profile details.

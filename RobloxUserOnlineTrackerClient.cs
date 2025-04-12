@@ -30,7 +30,7 @@ namespace RobloxUserOnlineTracker
         /// <summary>
         /// Event triggered when an error occurs during tracking.
         /// </summary>
-        public event EventHandler<(Exception Exception, int? RetryAttempt, bool? TrackerStopped)>? TrackingErrorOccurred;
+        public event EventHandler<TrackerError>? TrackingErrorOccurred;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RobloxUserOnlineTrackerClient"/> class with the specified Roblox authentication cookie value.
@@ -162,13 +162,23 @@ namespace RobloxUserOnlineTracker
                     }
                     catch (Exception ex)
                     {
+                        var trackerError = new TrackerError
+                        {
+                            RetryAttempt = retryAttempt,
+                            MaxRetryAttempts = options.RetryTimesValue,
+                            LastAttemptTime = DateTime.Now,
+                            TrackerStopped = retryAttempt == options.RetryTimesValue
+                        };
+
                         if (ex is RobloxUserOnlineTrackerException)
                         {
-                            TrackingErrorOccurred?.Invoke(this, (ex, retryAttempt, retryAttempt == options.RetryTimesValue));
+                            trackerError.Exception = ex;
+                            TrackingErrorOccurred?.Invoke(this, trackerError);
                         }
                         else if (ex is not TaskCanceledException)
                         {
-                            TrackingErrorOccurred?.Invoke(this, (new RobloxUserOnlineTrackerException("Unable to get user online presences. See the inner exception for more details", ex), retryAttempt, retryAttempt == options.RetryTimesValue));
+                            trackerError.Exception = new RobloxUserOnlineTrackerException("Unable to get user online presences. See the inner exception for more details", ex);
+                            TrackingErrorOccurred?.Invoke(this, trackerError);
                         }
 
                         if (options.RetryOnErrorValue && retryAttempt < options.RetryTimesValue)
